@@ -20,9 +20,13 @@ public class SpecialitiesController : Controller
         _specialityRepository = specialityRepository;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string message = "", bool isError = false)
     {
         var model = await IndexViewModel.CreateAsync(_specialityRepository);
+        
+        model.Message = message;
+        model.IsError = isError;
+        
         return View(model);
     }
 
@@ -33,7 +37,7 @@ public class SpecialitiesController : Controller
     }
     
     
-    public async Task<IActionResult> Create(int id)
+    public async Task<IActionResult> Create()
     {
         var model = await CreateViewModel.CreateAsync();
         return View(model);
@@ -44,7 +48,31 @@ public class SpecialitiesController : Controller
     {
         
         await _specialityRepository.AddAsync(model.Speciality);
-        return RedirectToAction("Index");
+        return RedirectToAction("Index", new { message = "Speciality added successfully." });
+    }
+    
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id)
+    {
+        try
+        {
+            var speciality = await _specialityRepository.GetByIdAsync(id);
+
+            if (speciality != null)
+            {
+                await _specialityRepository.RemoveAsync(speciality);
+                return RedirectToAction("Index", new { message = "Speciality deleted successfully." });
+            }
+        
+            return RedirectToAction("Index", new { message = "Speciality not found.", isError = true });
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return RedirectToAction("Index", new { message = "Error", isError = true });
+        }
+        
     }
 
     public async Task<IActionResult> Edit(int id)

@@ -6,6 +6,8 @@ namespace FullStackTechTest.Models.Specialities;
 public class IndexViewModel
 {
     public List<Speciality> SpecialityList { get; set; }
+    public string? Message { get; set; }
+    public bool IsError { get; set; }
 
     public static async Task<IndexViewModel> CreateAsync(ISpecialityRepository specialityRepository)
     {

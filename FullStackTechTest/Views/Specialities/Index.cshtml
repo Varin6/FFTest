@@ -5,6 +5,22 @@
 }
 
 <div class="container">
+    @if(!string.IsNullOrEmpty(Model.Message))
+    {
+        if (Model.IsError)
+        {
+            <div class="alert alert-danger" role="alert">
+                @Model.Message
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-success" role="alert">
+                @Model.Message
+            </div>
+        }
+    }
+    
     <div class="pb-4">
 
         <a href="@Url.Action("Create")" class="btn btn-primary" role="button">Create</a>
@@ -16,6 +32,7 @@
         <tr>
             <th>Id</th>
             <th>Name</th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
@@ -24,6 +41,14 @@
             <tr class="clickable-row pointer-event" data-href="@Url.Action("Details", new { id = speciality.Id })">
                 <td>@speciality.Id</td>
                 <td>@speciality.Name</td>
+                <td>
+                    @using (Html.BeginForm("Delete", "Specialities", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.Hidden("id", speciality.Id)
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    }
+                </td>
             </tr>
         }
         </tbody>
