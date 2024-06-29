@@ -1,5 +1,7 @@
 using DAL;
 using DotNetEnv;
+using Services;
+using Services.Interfaces;
 
 Env.Load();
 
@@ -12,6 +14,8 @@ builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 // DI
 builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 builder.Services.AddScoped<IAddressRepository, AddressRepository>();
+
+builder.Services.AddScoped<IJsonImportService, JsonImportService>();
 
 var app = builder.Build();
 

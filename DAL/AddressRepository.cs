@@ -67,4 +67,40 @@ public class AddressRepository : IAddressRepository
         };
         return address;
     }
+    
+    
+    public async Task AddAsync(Address address)
+    {
+        var sql = new StringBuilder();
+        sql.AppendLine("INSERT INTO addresses (Line1, City, Postcode, PersonId)");
+        sql.AppendLine("VALUES (@line1, @city, @postcode, @personId);");
+
+        await using (var connection = new MySqlConnection(Config.DbConnectionString))
+        {
+            await connection.OpenAsync();
+
+            var command = new MySqlCommand(sql.ToString(), connection);
+            command.Parameters.AddWithValue("line1", address.Line1);
+            command.Parameters.AddWithValue("city", address.City);
+            command.Parameters.AddWithValue("postcode", address.Postcode);
+            command.Parameters.AddWithValue("personId", address.PersonId);
+
+            await command.ExecuteNonQueryAsync();
+        }
+    }
+
+    public async Task AddAsync(Address address, MySqlTransaction transaction)
+    {
+        var sql = new StringBuilder();
+        sql.AppendLine("INSERT INTO addresses (Line1, City, Postcode, PersonId)");
+        sql.AppendLine("VALUES (@line1, @city, @postcode, @personId);");
+
+        var command = new MySqlCommand(sql.ToString(), transaction.Connection, transaction);
+        command.Parameters.AddWithValue("line1", address.Line1);
+        command.Parameters.AddWithValue("city", address.City);
+        command.Parameters.AddWithValue("postcode", address.Postcode);
+        command.Parameters.AddWithValue("personId", address.PersonId);
+
+        await command.ExecuteNonQueryAsync();
+    }
 }

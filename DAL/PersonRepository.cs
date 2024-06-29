@@ -89,4 +89,79 @@ public class PersonRepository : IPersonRepository
         };
         return person;
     }
+    
+    
+    public async Task<int> AddAsync(Person person)
+    {
+        var sql = new StringBuilder();
+        sql.AppendLine("INSERT INTO people (FirstName, LastName, GMC)");
+        sql.AppendLine("VALUES (@firstName, @lastName, @gmc);");
+        sql.AppendLine("SELECT LAST_INSERT_ID();");
+
+        await using (var connection = new MySqlConnection(Config.DbConnectionString))
+        {
+            await connection.OpenAsync();
+
+            var command = new MySqlCommand(sql.ToString(), connection);
+            command.Parameters.AddWithValue("firstName", person.FirstName);
+            command.Parameters.AddWithValue("lastName", person.LastName);
+            command.Parameters.AddWithValue("gmc", person.GMC);
+
+            var personId = Convert.ToInt32(await command.ExecuteScalarAsync());
+            return personId;
+        }
+    }
+    
+    
+    public async Task<int> AddAsync(Person person, MySqlTransaction transaction)
+    {
+        var sql = new StringBuilder();
+        sql.AppendLine("INSERT INTO people (FirstName, LastName, GMC)");
+        sql.AppendLine("VALUES (@firstName, @lastName, @gmc);");
+        sql.AppendLine("SELECT LAST_INSERT_ID();");
+
+        var command = new MySqlCommand(sql.ToString(), transaction.Connection, transaction);
+        command.Parameters.AddWithValue("firstName", person.FirstName);
+        command.Parameters.AddWithValue("lastName", person.LastName);
+        command.Parameters.AddWithValue("gmc", person.GMC);
+
+        var personId = Convert.ToInt32(await command.ExecuteScalarAsync());
+        return personId;
+    }
+    
+    
+    public async Task<List<Person>> GetByGmcListAsync(List<int> gmcs)
+    {
+        var persons = new List<Person>();
+        var gmcPlaceholders = string.Join(",", gmcs.Select((gmc, index) => $"@gmc{index}"));
+
+        var sql = new StringBuilder();
+        sql.AppendLine($"SELECT * FROM people WHERE GMC IN ({gmcPlaceholders})");
+
+        await using (var connection = new MySqlConnection(Config.DbConnectionString))
+        {
+            await connection.OpenAsync();
+
+            var command = new MySqlCommand(sql.ToString(), connection);
+            for (int i = 0; i < gmcs.Count; i++)
+            {
+                command.Parameters.AddWithValue($"@gmc{i}", gmcs[i]);
+            }
+
+            var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                persons.Add(PopulatePerson(reader));
+            }
+        }
+
+        return persons;
+    }
+
+    public async Task<MySqlTransaction> BeginTransactionAsync()
+    {
+        var connection = new MySqlConnection(Config.DbConnectionString);
+        await connection.OpenAsync();
+        return await connection.BeginTransactionAsync();
+    }
 }
