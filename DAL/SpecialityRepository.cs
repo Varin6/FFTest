@@ -56,7 +56,7 @@ public class SpecialityRepository : BaseRepository, ISpecialityRepository
     {
         var sql = new StringBuilder();
         sql.AppendLine("UPDATE specialities SET");
-        sql.AppendLine("Name = @name,");
+        sql.AppendLine("Name = @name");
         sql.AppendLine("WHERE Id = @specialityId");
         
         await using (var connection = new MySqlConnection(Config.DbConnectionString))
