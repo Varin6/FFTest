@@ -5,6 +5,12 @@
 }
 
 <div class="container">
+    <div class="pb-4">
+
+        <a href="@Url.Action("Create")" class="btn btn-primary" role="button">Create</a>
+
+    </div>
+
     <table class="table table-bordered table-hover">
         <thead>
         <tr>
@@ -15,7 +21,7 @@
         <tbody>
         @foreach (var speciality in Model.SpecialityList)
         {
-            <tr class="clickable-row pointer-event" data-href="@Url.Action("Details", new { id = speciality.Id})">
+            <tr class="clickable-row pointer-event" data-href="@Url.Action("Details", new { id = speciality.Id })">
                 <td>@speciality.Id</td>
                 <td>@speciality.Name</td>
             </tr>

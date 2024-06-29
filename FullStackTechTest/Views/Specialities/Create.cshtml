@@ -1,0 +1,29 @@
+@model FullStackTechTest.Models.Specialities.CreateViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<div class="container">
+    <div class="pb-4">
+       
+        <a href="@Url.Action("Index")" class="btn btn-primary" role="button">Back</a>
+       
+    </div>
+    
+    <p>Create a new Speciality</p>
+
+    @using (Html.BeginForm("Create", "Specialities", FormMethod.Post, new { @class = "form-inline" }))
+    {
+        
+        <div class="form-group pb-1 mb-4">
+            <label>Name:</label>
+            <input type="text" name="speciality.name" value="@Model.Speciality.Name" class="form-control" />
+        </div>
+        
+        <div>
+            <input type="submit" value="Save" class="btn btn-primary" />
+        </div>
+        
+    }
+</div>

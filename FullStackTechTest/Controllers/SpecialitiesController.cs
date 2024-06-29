@@ -31,6 +31,21 @@ public class SpecialitiesController : Controller
         var model = await DetailsViewModel.CreateAsync(id, false, _specialityRepository);
         return View(model);
     }
+    
+    
+    public async Task<IActionResult> Create(int id)
+    {
+        var model = await CreateViewModel.CreateAsync();
+        return View(model);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromForm] CreateViewModel model)
+    {
+        
+        await _specialityRepository.AddAsync(model.Speciality);
+        return RedirectToAction("Index");
+    }
 
     public async Task<IActionResult> Edit(int id)
     {
