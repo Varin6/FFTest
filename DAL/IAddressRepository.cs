@@ -3,7 +3,7 @@ using MySql.Data.MySqlClient;
 
 namespace DAL;
 
-public interface IAddressRepository
+public interface IAddressRepository : IBaseRepository
 {
     Task<Address> GetForPersonIdAsync(int personId);
     Task SaveAsync(Address address);

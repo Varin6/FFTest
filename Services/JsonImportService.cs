@@ -16,7 +16,7 @@ public class JsonImportService : IJsonImportService
             _addressRepository = addressRepository;
         }
 
-        public async Task ImportDataAsync(string jsonData)
+        public async Task<string?> ImportDataAsync(string jsonData)
         {
             var persons = JsonConvert.DeserializeObject<List<PersonDto>>(jsonData);
 
@@ -44,17 +44,21 @@ public class JsonImportService : IJsonImportService
 
                             var personId = await _personRepository.AddAsync(person, transaction);
 
-                            foreach (var addressDto in personDto.Address)
+                            if (personDto.Address != null && personDto.Address.Any())
                             {
-                                var address = new Address
+                                foreach (var addressDto in personDto.Address)
                                 {
-                                    Line1 = addressDto.Line1,
-                                    City = addressDto.City,
-                                    Postcode = addressDto.Postcode,
-                                    PersonId = personId
-                                };
+                                    var address = new Address
+                                    {
+                                        Line1 = addressDto.Line1,
+                                        City = addressDto.City,
+                                        Postcode = addressDto.Postcode,
+                                        PersonId = personId
+                                    };
 
-                                await _addressRepository.AddAsync(address, transaction);
+
+                                    await _addressRepository.AddAsync(address, transaction);
+                                }
                             }
                         }
 
@@ -68,7 +72,14 @@ public class JsonImportService : IJsonImportService
                         throw;
                     }
                 }
+                
+                return $"{newPersons.Count} new records imported";
             }
+            else
+            {
+                return "No new records to import";
+            }
+            
         }
 
         private class PersonDto

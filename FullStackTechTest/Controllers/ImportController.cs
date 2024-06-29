@@ -12,15 +12,12 @@ namespace FullStackTechTest.Controllers;
 public class ImportController : Controller
 {
     private readonly ILogger<ImportController> _logger;
-    private readonly IPersonRepository _personRepository;
-    private readonly IAddressRepository _addressRepository;
+
     private readonly IJsonImportService _jsonImportService;
 
-    public ImportController(ILogger<ImportController> logger, IPersonRepository personRepository, IAddressRepository addressRepository, IJsonImportService jsonImportService)
+    public ImportController(ILogger<ImportController> logger, IJsonImportService jsonImportService)
     {
         _logger = logger;
-        _personRepository = personRepository;
-        _addressRepository = addressRepository;
         _jsonImportService = jsonImportService;
     }
 
@@ -31,20 +28,33 @@ public class ImportController : Controller
 
     
     [HttpPost]
-    public async Task<IActionResult> Import(IFormFile jsonFile)
+    public async Task<IActionResult> Index(IFormFile jsonFile)
     {
-        if (jsonFile == null || jsonFile.Length == 0)
+        try
         {
-            return BadRequest("No file uploaded.");
-        }
+            if (jsonFile == null || jsonFile.Length == 0)
+            {
+                _logger.LogError("No file uploaded.");
+                return View(new ImportViewModel(){Message = "No file uploaded.", IsError = true});
+            }
 
-        using (var stream = new StreamReader(jsonFile.OpenReadStream()))
+            using (var stream = new StreamReader(jsonFile.OpenReadStream()))
+            {
+                var jsonData = await stream.ReadToEndAsync();
+                var message = await _jsonImportService.ImportDataAsync(jsonData);
+                
+                return View(new ImportViewModel(){Message = message});
+            }
+
+            
+        }
+        catch (Exception e)
         {
-            var jsonData = await stream.ReadToEndAsync();
-            await _jsonImportService.ImportDataAsync(jsonData);
+            _logger.LogError(e, "Error importing data from Json file.");
+            return View(new ImportViewModel(){Message = "Import unsuccessful. Please check the file and try again.", IsError = true});
         }
-
-        return Ok("Import successful.");
+        
+        
     }
     
     

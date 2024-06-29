@@ -5,7 +5,7 @@ using MySql.Data.MySqlClient;
 
 namespace DAL;
 
-public class PersonRepository : IPersonRepository
+public class PersonRepository : BaseRepository, IPersonRepository
 {
     public async Task<List<Person>> ListAllAsync()
     {
@@ -30,6 +30,7 @@ public class PersonRepository : IPersonRepository
         return peopleList;
     }
 
+    
     public async Task<Person> GetByIdAsync(int personId)
     {
         var person = new Person();
@@ -157,11 +158,6 @@ public class PersonRepository : IPersonRepository
 
         return persons;
     }
-
-    public async Task<MySqlTransaction> BeginTransactionAsync()
-    {
-        var connection = new MySqlConnection(Config.DbConnectionString);
-        await connection.OpenAsync();
-        return await connection.BeginTransactionAsync();
-    }
+    
+    
 }

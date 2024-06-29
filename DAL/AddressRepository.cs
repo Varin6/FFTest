@@ -5,7 +5,7 @@ using MySql.Data.MySqlClient;
 
 namespace DAL;
 
-public class AddressRepository : IAddressRepository
+public class AddressRepository : BaseRepository, IAddressRepository
 {
     public async Task<Address> GetForPersonIdAsync(int personId)
     {

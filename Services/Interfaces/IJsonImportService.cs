@@ -2,5 +2,5 @@
 
 public interface IJsonImportService
 {
-    Task ImportDataAsync(string jsonData);
+    Task<string?> ImportDataAsync(string jsonData);
 }
