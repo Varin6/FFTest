@@ -11,7 +11,6 @@ public interface ISpecialityRepository : IBaseRepository
     Task<int> AddAsync(Speciality speciality);
     Task SaveAsync(Speciality speciality);
     Task RemoveAsync(Speciality speciality);
-    Task AddSpecialityToPersonAsync(int personId, int specialityId);
-    Task RemoveSpecialityFromPersonAsync(int personId, int specialityId);
+    Task UpdatePersonSpecialitiesAsync(int personId, List<int> newSpecialityIds);
     Task<List<Speciality>> GetSpecialitiesByPersonIdAsync(int personId);
 }

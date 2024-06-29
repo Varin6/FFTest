@@ -54,6 +54,30 @@
         
         @if (Model.IsEditing)
         {
+            <div class="form-group pb-4">
+                <label>Specialities:</label>
+                <select asp-for="SelectedSpecialityIds" asp-items="@(new SelectList(Model.Specialities, "Id", "Name"))" class="form-control" style="height: 250px" multiple></select>
+            </div>
+        }
+        else
+        {
+            if (Model.SelectedSpecialities.Any())
+            {
+                <div class="form-group pb-4">
+                    <label>Specialities:</label>
+                    <ul>
+                        @foreach (var speciality in Model.SelectedSpecialities)
+                        {
+                            <li>@speciality.Name</li>
+                        }
+                    </ul>
+                </div>
+            }
+            
+        }
+        
+        @if (Model.IsEditing)
+        {
             <div>
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>

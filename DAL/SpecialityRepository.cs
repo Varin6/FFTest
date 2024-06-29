@@ -132,39 +132,46 @@ public class SpecialityRepository : BaseRepository, ISpecialityRepository
         return speciality;
     }
 
-    public async Task AddSpecialityToPersonAsync(int personId, int specialityId)
-    {
-        var sql = new StringBuilder();
-        sql.AppendLine("INSERT INTO person_specialities (PersonId, SpecialityId)");
-        sql.AppendLine("VALUES (@personId, @specialityId);");
-
-        await using (var connection = new MySqlConnection(Config.DbConnectionString))
-        {
-            await connection.OpenAsync();
-
-            var command = new MySqlCommand(sql.ToString(), connection);
-            command.Parameters.AddWithValue("personId", personId);
-            command.Parameters.AddWithValue("specialityId", specialityId);
-
-            await command.ExecuteNonQueryAsync();
-        }
-    }
     
-    public async Task RemoveSpecialityFromPersonAsync(int personId, int specialityId)
+    public async Task UpdatePersonSpecialitiesAsync(int personId, List<int> newSpecialityIds)
     {
-        var sql = new StringBuilder();
-        sql.AppendLine("DELETE FROM person_specialities");
-        sql.AppendLine("WHERE PersonId = @personId AND SpecialityId = @specialityId");
-
         await using (var connection = new MySqlConnection(Config.DbConnectionString))
         {
             await connection.OpenAsync();
 
-            var command = new MySqlCommand(sql.ToString(), connection);
-            command.Parameters.AddWithValue("personId", personId);
-            command.Parameters.AddWithValue("specialityId", specialityId);
+            using (var transaction = await connection.BeginTransactionAsync())
+            {
+                // Clear all existing specialities for the person
+                var deleteSql = "DELETE FROM person_specialities WHERE PersonId = @personId";
+                var deleteCommand = new MySqlCommand(deleteSql, connection, transaction);
+                deleteCommand.Parameters.AddWithValue("personId", personId);
+                await deleteCommand.ExecuteNonQueryAsync();
 
-            await command.ExecuteNonQueryAsync();
+                // Add new specialities
+                if (newSpecialityIds != null && newSpecialityIds.Any())
+                {
+                    var insertSql = new StringBuilder();
+                    insertSql.AppendLine("INSERT INTO person_specialities (PersonId, SpecialityId) VALUES");
+
+                    for (int i = 0; i < newSpecialityIds.Count; i++)
+                    {
+                        if (i > 0) insertSql.AppendLine(",");
+                        insertSql.Append($"(@personId, @specialityId{i})");
+                    }
+                    insertSql.Append(";");
+
+                    var insertCommand = new MySqlCommand(insertSql.ToString(), connection, transaction);
+                    insertCommand.Parameters.AddWithValue("personId", personId);
+                    for (int i = 0; i < newSpecialityIds.Count; i++)
+                    {
+                        insertCommand.Parameters.AddWithValue($"specialityId{i}", newSpecialityIds[i]);
+                    }
+
+                    await insertCommand.ExecuteNonQueryAsync();
+                }
+
+                await transaction.CommitAsync();
+            }
         }
     }
 
