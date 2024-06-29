@@ -19,4 +19,9 @@
       <ProjectReference Include="..\Services\Services.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <AdditionalFiles Include="Views\Specialities\Details.cshtml" />
+      <AdditionalFiles Include="Views\Specialities\Index.cshtml" />
+    </ItemGroup>
+
 </Project>
